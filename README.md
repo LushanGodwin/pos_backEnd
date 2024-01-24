@@ -66,7 +66,7 @@ The `logback.xml` file is the configuration file for Logback. It allows you to c
 
 Here is an example of a basic `logback.xml` configuration:
 
-```xml
+## xml
 <configuration>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -82,5 +82,14 @@ Here is an example of a basic `logback.xml` configuration:
 
 </configuration>
 
+## Additional Information
+
+ -- Make sure you have a MySQL server set up.
+ 
+ -- Adjust database credentials and connection details in your application configuration.
+ 
+ -- Customize the schema as per your application's requirements.
+ 
+ -- Feel free to explore and modify the database schema based on your project's needs.
 
 Happy coding!
