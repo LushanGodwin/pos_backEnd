@@ -47,4 +47,12 @@ Follow the steps below to use the APIs in this collection:
 
 Feel free to explore and test the API endpoints using this Postman collection.
 
+## Database Connection Configuration
+
+<Resource name="jdbc/pos_system" auth="Container" type="javax.sql.DataSource"
+    maxTotal="10" maxIdle="8" maxWaitMillis="-1"
+    username="your user name" password="your password" driverClassName="com.mysql.cj.jdbc.Driver"
+    url="jdbc:mysql://localhost:3306/pos_system"/>
+
+
 Happy coding!
