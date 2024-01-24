@@ -2,6 +2,7 @@ package lk.ijse.demo.DBProcess;
 
 import lk.ijse.demo.dto.CustomerDTO;
 import lk.ijse.demo.dto.ItemDTO;
+import lk.ijse.demo.dto.OrderDetailsDTO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,11 +12,11 @@ import java.util.ArrayList;
 
 public class ItemDB {
     public boolean saveItem(ItemDTO itemDTO, Connection connection) {
-        String saveItem = "INSERT INTO item (item_code,item_description,item_qty,item_price) VALUES (?,?,?,?)";
+        String saveItem = "INSERT INTO item (item_code,item_name,price,qty) VALUES (?,?,?,?)";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(saveItem);
             preparedStatement.setString(1,itemDTO.getItem_code());
-            preparedStatement.setString(2,itemDTO.getItem_description());
+            preparedStatement.setString(2,itemDTO.getItem_name());
             preparedStatement.setString(3, String.valueOf(itemDTO.getItem_qty()));
             preparedStatement.setString(4, String.valueOf(itemDTO.getItem_price()));
 
@@ -34,9 +35,10 @@ public class ItemDB {
             if (resultSet.next()){
                 return new ItemDTO(
                         resultSet.getString("item_code"),
-                        resultSet.getString("item_description"),
-                        resultSet.getInt("item_qty"),
-                        resultSet.getInt("item_price")
+                        resultSet.getString("item_name"),
+                        resultSet.getInt("item_price"),
+                        resultSet.getInt("item_qty")
+
                 );
             }
         } catch (SQLException e) {
@@ -54,9 +56,10 @@ public class ItemDB {
             while (resultSet.next()){
                 ItemDTO itemDTO = new ItemDTO(
                         resultSet.getString("item_code"),
-                        resultSet.getString("item_description"),
-                        resultSet.getInt("item_qty"),
-                        resultSet.getInt("item_price")
+                        resultSet.getString("item_name"),
+                        resultSet.getInt("item_price"),
+                        resultSet.getInt("item_qty")
+
                 );
                 itemDTOS.add(itemDTO);
             }
@@ -67,10 +70,10 @@ public class ItemDB {
     }
 
     public boolean updateItem(ItemDTO itemDTO, Connection connection) {
-        String updateItem = "UPDATE item SET item_description=?,item_qty=?,item_price=? where  item_code=?;";
+        String updateItem = "UPDATE item SET item_name=?,price=?,qty=? where  item_code=?;";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(updateItem);
-            preparedStatement.setString(1,itemDTO.getItem_description());
+            preparedStatement.setString(1,itemDTO.getItem_name());
             preparedStatement.setString(2, String.valueOf(itemDTO.getItem_qty()));
             preparedStatement.setString(3, String.valueOf(itemDTO.getItem_price()));
             preparedStatement.setString(4,itemDTO.getItem_code());
@@ -91,6 +94,19 @@ public class ItemDB {
         } catch (SQLException e) {
             throw new RuntimeException(e);
 
+        }
+    }
+
+    public boolean updateItemOrder(OrderDetailsDTO orderDetailsDTO, Connection connection) {
+        String sql = "UPDATE item SET qty = qty - ? WHERE item_code = ?;";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1,orderDetailsDTO.getQty());
+            preparedStatement.setString(2, orderDetailsDTO.getItem_id());
+
+            return preparedStatement.executeUpdate() != 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }
