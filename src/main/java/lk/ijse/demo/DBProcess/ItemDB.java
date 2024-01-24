@@ -17,8 +17,8 @@ public class ItemDB {
             PreparedStatement preparedStatement = connection.prepareStatement(saveItem);
             preparedStatement.setString(1,itemDTO.getItem_code());
             preparedStatement.setString(2,itemDTO.getItem_name());
-            preparedStatement.setString(3, String.valueOf(itemDTO.getItem_qty()));
-            preparedStatement.setString(4, String.valueOf(itemDTO.getItem_price()));
+            preparedStatement.setString(3, String.valueOf(itemDTO.getPrice()));
+            preparedStatement.setString(4, String.valueOf(itemDTO.getQty()));
 
             return preparedStatement.executeUpdate()!=0;
         } catch (SQLException e) {
@@ -36,8 +36,8 @@ public class ItemDB {
                 return new ItemDTO(
                         resultSet.getString("item_code"),
                         resultSet.getString("item_name"),
-                        resultSet.getInt("item_price"),
-                        resultSet.getInt("item_qty")
+                        resultSet.getInt("price"),
+                        resultSet.getInt("qty")
 
                 );
             }
@@ -57,8 +57,8 @@ public class ItemDB {
                 ItemDTO itemDTO = new ItemDTO(
                         resultSet.getString("item_code"),
                         resultSet.getString("item_name"),
-                        resultSet.getInt("item_price"),
-                        resultSet.getInt("item_qty")
+                        resultSet.getInt("price"),
+                        resultSet.getInt("qty")
 
                 );
                 itemDTOS.add(itemDTO);
@@ -74,8 +74,8 @@ public class ItemDB {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(updateItem);
             preparedStatement.setString(1,itemDTO.getItem_name());
-            preparedStatement.setString(2, String.valueOf(itemDTO.getItem_qty()));
-            preparedStatement.setString(3, String.valueOf(itemDTO.getItem_price()));
+            preparedStatement.setString(2, String.valueOf(itemDTO.getPrice()));
+            preparedStatement.setString(3, String.valueOf(itemDTO.getQty()));
             preparedStatement.setString(4,itemDTO.getItem_code());
 
             return preparedStatement.executeUpdate()!=0;

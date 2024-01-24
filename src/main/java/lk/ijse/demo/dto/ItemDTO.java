@@ -12,6 +12,7 @@ import java.io.Serializable;
 public class ItemDTO implements Serializable {
     private String item_code;
     private String item_name;
-    private int item_qty;
-    private double item_price;
+    private double price;
+    private int qty;
+
 }
