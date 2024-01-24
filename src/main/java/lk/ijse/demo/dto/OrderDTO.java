@@ -1,14 +1,17 @@
 package lk.ijse.demo.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Setter
-@ToString
-@Getter
+@Data
 public class OrderDTO {
+    private String order_date;
     private String order_id;
     private String customer_id;
-    private int order_date;
+    private double total;
+    private double discount;
+    private double cash;
 }
