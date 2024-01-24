@@ -54,5 +54,33 @@ Feel free to explore and test the API endpoints using this Postman collection.
     username="your user name" password="your password" driverClassName="com.mysql.cj.jdbc.Driver"
     url="jdbc:mysql://localhost:3306/pos_system"/>
 
+This repository contains the source code for pos_system. Below are instructions for configuring logging using SLF4J and Logback.
+
+## Logging Configuration
+
+The application utilizes SLF4J as the logging facade and Logback as the logging implementation. The configuration for logging can be customized by modifying the `logback.xml` file.
+
+### Logback.xml
+
+The `logback.xml` file is the configuration file for Logback. It allows you to control various aspects of logging, including log levels, output format, and log file locations.
+
+Here is an example of a basic `logback.xml` configuration:
+
+```xml
+<configuration>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- Pattern to output the caller's file name and line number -->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+        </layout>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>
+
 
 Happy coding!
