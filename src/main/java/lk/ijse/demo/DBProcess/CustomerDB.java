@@ -95,4 +95,21 @@ public class CustomerDB {
 
         }
     }
+
+    public ArrayList<String> getAllCustomerIds(Connection connection) {
+        String sql = "select customerId from customer;";
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            ArrayList<String> allCustomerIds = new ArrayList<>();
+            while (resultSet.next()){
+                String customerId = resultSet.getString("customerId");
+                allCustomerIds.add(customerId);
+            }
+            return allCustomerIds;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

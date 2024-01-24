@@ -18,121 +18,141 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-@WebServlet(name = "Customer",urlPatterns = "/customer",initParams = {
-        @WebInitParam(name = "db-user",value = "root"),
-        @WebInitParam(name = "db-pw",value = "1234"),
-        @WebInitParam(name = "db-url",value = "jdbc:mysql://localhost:3306/pos_system"),
-        @WebInitParam(name = "db-class",value = "com.mysql.cj.jdbc.Driver")
-}
-        ,loadOnStartup = 5
-
-)
+@WebServlet(name = "Customer",urlPatterns = "/customer")
 public class Customer extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(Customer.class.getName());
 
     Connection connection;
 
     @Override
     public void init() throws ServletException {
-        try{
+        try {
             InitialContext initialContext = new InitialContext();
             DataSource lookup = (DataSource) initialContext.lookup("java:comp/env/jdbc/pos_system");
             this.connection = lookup.getConnection();
         } catch (NamingException | SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error initializing connection: " + e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("POST");
-        System.out.println(req.getContentType());
-        if (req.getContentType() != null && req.getContentType().toLowerCase().startsWith("application/json")){
-            Jsonb jsonb = JsonbBuilder.create();
-            CustomerDTO customerDTO = jsonb.fromJson(req.getReader(),CustomerDTO.class);
-            var dbProcess = new CustomerDB();
-                boolean result = dbProcess.saveCustomer(customerDTO, connection);
-                if (result){
-                    resp.setStatus(HttpServletResponse.SC_OK);
-                    resp.getWriter().write("Customer Information saved Successfully !");
-                }else {
-                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Fail to saved customer information !");
-                }
+        LOGGER.info("POST request received");
+        LOGGER.info("Content Type: " + req.getContentType());
 
-        }else {
+        if (req.getContentType() != null && req.getContentType().toLowerCase().startsWith("application/json")) {
+            Jsonb jsonb = JsonbBuilder.create();
+            CustomerDTO customerDTO = jsonb.fromJson(req.getReader(), CustomerDTO.class);
+            var dbProcess = new CustomerDB();
+            boolean result = dbProcess.saveCustomer(customerDTO, connection);
+
+            if (result) {
+                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.getWriter().write("Customer Information saved Successfully !");
+            } else {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to save customer information !");
+            }
+
+        } else {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getContentType() != null && req.getContentType().toLowerCase().startsWith("application/json")){
+        LOGGER.info("PUT request received");
+
+        if (req.getContentType() != null && req.getContentType().toLowerCase().startsWith("application/json")) {
             Jsonb jsonb = JsonbBuilder.create();
             CustomerDTO customerDTO = jsonb.fromJson(req.getReader(), CustomerDTO.class);
 
             var dbProcess = new CustomerDB();
             boolean result = dbProcess.updateCustomer(customerDTO, connection);
 
-            if (result){
+            if (result) {
                 resp.setStatus(HttpServletResponse.SC_OK);
                 resp.getWriter().write("Customer information updated successfully.");
-            }else {
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Failed to update customer information.");
+            } else {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to update customer information.");
             }
 
-        }else {
+        } else {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        LOGGER.info("DELETE request received");
+
         var customerId = req.getParameter("customerIdValue");
         var dbProcess = new CustomerDB();
         boolean result = dbProcess.deleteCustomer(connection, customerId);
+
         if (result) {
             resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter().write("Student information delete successfully.");
+            resp.getWriter().write("Customer information deleted successfully.");
         } else {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to delete student information.");
-
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to delete customer information.");
         }
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
-        if (action.equals("getAllCustomer")){
-            getAllCustomer(req,resp);
-        }else if(action.equals("getCustomer")){
-            String customerId = req.getParameter("customerId");
-            getCustomer(req,resp,customerId);
+
+        if (action != null) {
+            switch (action) {
+                case "getAllCustomer":
+                    LOGGER.info("GET request for all customers");
+                    getAllCustomer(req, resp);
+                    break;
+                case "getCustomer":
+                    String customerId = req.getParameter("customerId");
+                    LOGGER.info("GET request for customer with ID: " + customerId);
+                    getCustomer(req, resp, customerId);
+                    break;
+                default:
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    break;
+            }
+        } else {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
     private void getCustomer(HttpServletRequest req, HttpServletResponse resp, String customerId) {
         CustomerDB customerDB = new CustomerDB();
-        CustomerDTO customerDTO = customerDB.getCustomer(customerId,connection);
+        CustomerDTO customerDTO = customerDB.getCustomer(customerId, connection);
         Jsonb jsonb = JsonbBuilder.create();
         var json = jsonb.toJson(customerDTO);
         resp.setContentType("application/json");
         try {
             resp.getWriter().write(json);
         } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error writing JSON response: " + e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
 
-    public void getAllCustomer(HttpServletRequest req, HttpServletResponse resp){
+    public void getAllCustomer(HttpServletRequest req, HttpServletResponse resp) {
+        LOGGER.info("Getting all customers");
         CustomerDB customerDB = new CustomerDB();
         ArrayList<CustomerDTO> allCustomer = customerDB.getAllCustomer(connection);
-        System.out.println(allCustomer==null);
+
         Jsonb jsonb = JsonbBuilder.create();
         var json = jsonb.toJson(allCustomer);
         resp.setContentType("application/json");
+
         try {
             resp.getWriter().write(json);
         } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error writing JSON response: " + e.getMessage(), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new RuntimeException(e);
         }
